@@ -1,5 +1,5 @@
 import { db } from './firebase-config.js';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDocs, query } from 'firebase/firestore';
 
 class MemoryGame extends HTMLElement {
    constructor() {
@@ -188,7 +188,7 @@ class MemoryGame extends HTMLElement {
             this.canClick = true;
         }, 1000);
     }
-    
+
 async gameWon() {
     // Save game result to Firestore
     await this.saveGameResult();
@@ -211,6 +211,46 @@ async gameWon() {
     } catch (error) {
         console.error('Error saving game result to Firestore:', error);
         // Game continues even if save fails - don't interrupt user experience
+    }
+}
+async displayAverageClicks() {
+    const displayElement = this.shadowRoot.getElementById('average-display');
+    displayElement.textContent = 'Calculating...';
+
+    try {
+        // Query all game results from Firestore
+        const q = query(collection(db, 'gameResults'));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            displayElement.textContent = 'No games played yet!';
+            return;
+        }
+
+        // Calculate average clicks
+        let totalClicks = 0;
+        let gameCount = 0;
+
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            if (data.clicks) {
+                totalClicks += data.clicks;
+                gameCount++;
+            }
+        });
+
+        if (gameCount === 0) {
+            displayElement.textContent = 'No valid game data found.';
+            return;
+        }
+
+        const average = (totalClicks / gameCount).toFixed(2);
+        displayElement.textContent = `Average clicks: ${average} (from ${gameCount} games)`;
+        console.log(`Average calculated: ${average} clicks from ${gameCount} games`);
+
+    } catch (error) {
+        console.error('Error fetching game statistics:', error);
+        displayElement.textContent = 'Error loading statistics. Please check Firebase configuration.';
     }
 } 
 }
