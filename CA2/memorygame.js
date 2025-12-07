@@ -80,12 +80,22 @@ class MemoryGame extends HTMLElement {
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s;
+            margin: 0 5px;
         }     
         .stats-button:hover {
             background-color: #45a049;
         }
         .stats-button:active {
             background-color: #3d8b40;
+        }
+        restart-button {
+            background-color: #2196F3;
+        }
+        .restart-button:hover {
+            background-color: #0b7dda;
+        }
+        .restart-button:active {
+            background-color: #0869b8;
         }
         .average-display {
             margin-top: 10px;
@@ -116,6 +126,7 @@ class MemoryGame extends HTMLElement {
         </div>
         <div class="controls">
             <button class="stats-button" id="show-average-btn">Show Average Clicks</button>
+            <button class="stats-button restart-button" id="restart-btn">Restart Game</button>
             <div class="average-display" id="average-display"></div>
         </div>
         <div class="game-board" id="board"></div>
@@ -139,6 +150,9 @@ class MemoryGame extends HTMLElement {
     //add event listener for the statistics button
     const showAverageBtn = this.shadowRoot.getElementById('show-average-btn');
     showAverageBtn.addEventListener('click', () => this.displayAverageClicks());
+    //adding event listener for the restart button
+    const restartBtn = this.shadowRoot.getElementById('restart-btn');
+    restartBtn.addEventListener('click', () => this.restartGame());
     }
 
     handleCardClick(card) {
@@ -253,6 +267,23 @@ async displayAverageClicks() {
         displayElement.textContent = 'Error loading statistics. Please check Firebase configuration.';
     }
 } 
+restartGame() {
+    // Reset game state
+    this.flippedCards = [];
+    this.matchedPairs = 0;
+    this.canClick = true;
+    this.clickCount = 0;
+
+    // Clear average display
+    const displayElement = this.shadowRoot.getElementById('average-display');
+    if (displayElement) {
+        displayElement.textContent = '';
+    }
+
+    // Recreate the board with new shuffled cards
+    this.createBoard();
+    console.log('Game restarted');
+}
 }
 
 customElements.define('memory-game', MemoryGame);
