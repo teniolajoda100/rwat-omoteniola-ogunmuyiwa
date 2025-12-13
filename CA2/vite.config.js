@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-    base: '/rwat-omoteniola-ogunmuyiwa/',
+    base: '/',
     build: {
         outDir: 'dist',
         assetsDir: 'assets',
